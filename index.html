@@ -88,8 +88,8 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const KEY='meu-financeiro-v1';
-const CATS={income:['Salário','Renda extra','Investimentos','Presente','Reembolso','Outros'],expense:['Moradia','Alimentação','Transporte','Contas','Saúde','Educação','Lazer','Compras','Assinaturas','Impostos','Outros']};
-const icons={'Conta corrente':'🏦','Poupança':'🐷','Carteira':'👛','Cartão de crédito':'💳','Investimentos':'📈','Dinheiro':'💵','Salário':'💰','Moradia':'🏠','Alimentação':'🍽️','Transporte':'🚗','Contas':'🧾','Saúde':'💚','Educação':'📚','Lazer':'🎯','Compras':'🛍️','Assinaturas':'🔁','Impostos':'📑','Renda extra':'✨','Outros':'◈'};
+const CATS={income:['Salário','Renda extra','Investimentos','Presente','Reembolso','Outros'],expense:['Moradia','Alimentação','Transporte','Água','Energia','Internet','Contas','Saúde','Educação','Lazer','Compras','Assinaturas','Impostos','Outros']};
+const icons={'Conta corrente':'🏦','Poupança':'🐷','Carteira':'👛','Cartão de crédito':'💳','Investimentos':'📈','Dinheiro':'💵','Salário':'💰','Moradia':'🏠','Alimentação':'🍽️','Transporte':'🚗','Água':'💧','Energia':'⚡','Internet':'📶','Contas':'🧾','Saúde':'💚','Educação':'📚','Lazer':'🎯','Compras':'🛍️','Assinaturas':'🔁','Impostos':'📑','Renda extra':'✨','Outros':'◈'};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const today=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const monthKey=d=>String(d||today()).slice(0,7);
