@@ -26,3 +26,7 @@ Abra `index.html` no navegador. Os dados são salvos no navegador atual. Use **C
 
 ## Privacidade
 Este aplicativo não pede credenciais bancárias. Os dados financeiros são armazenados no navegador local e não são enviados a um servidor por este código. Limpar os dados do navegador pode apagar o conteúdo; mantenha backups regulares.
+
+
+### Categorias de despesas
+O formulário de despesas inclui as categorias **Água**, **Energia** e **Internet**, além das categorias já existentes.
