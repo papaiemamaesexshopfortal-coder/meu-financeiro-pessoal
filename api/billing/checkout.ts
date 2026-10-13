@@ -1,30 +1,44 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import Stripe from "stripe";
 import { clients, method, requireUser } from "../_lib/supabase";
+import { asaasRequest } from "../_lib/asaas";
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!method(req,res,["POST"])) return;
   const user = await requireUser(req,res); if (!user) return;
-  const code = typeof req.body?.plan_code === "string" ? req.body.plan_code : "";
-  if (!["premium","mei_pme_pro"].includes(code)) { res.status(400).json({ error: { code: "INVALID_PLAN", message: "Selecione um plano pago válido." } }); return; }
-  const appUrl = process.env.APP_URL;
-  if (!appUrl || !process.env.STRIPE_SECRET_KEY) { res.status(503).json({ error: { code: "BILLING_NOT_CONFIGURED", message: "O serviço de cobrança ainda não foi configurado." } }); return; }
+  const code = req.body?.plan_code;
+  const name = String(req.body?.name || "").trim();
+  const cpfCnpj = String(req.body?.cpf_cnpj || "").replace(/[^0-9]/g, "");
+  const billingType = req.body?.billing_type || "UNDEFINED";
+  if (!["premium","mei_pme_pro"].includes(code) || !["UNDEFINED","PIX","BOLETO"].includes(billingType) || name.length < 3 || ![11,14].includes(cpfCnpj.length) || !user.email) {
+    res.status(400).json({ error: { code: "INVALID_CHECKOUT", message: "Informe plano, nome e CPF/CNPJ válidos." } }); return;
+  }
+  if (!process.env.ASAAS_API_KEY) { res.status(503).json({ error: { code: "BILLING_NOT_CONFIGURED" } }); return; }
   try {
     const { admin } = clients();
-    const { data: plan, error } = await admin.from("plans").select("id,code,name,price_monthly,currency").eq("code",code).eq("is_active",true).single();
+    const { data: plan, error } = await admin.from("plans").select("id,name,price_monthly").eq("code",code).eq("is_active",true).single();
     if (error || !plan) { res.status(404).json({ error: { code: "PLAN_NOT_FOUND" } }); return; }
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer_email: user.email || undefined,
-      line_items: [{ price_data: { currency: String(plan.currency || "BRL").toLowerCase(), unit_amount: Math.round(Number(plan.price_monthly)*100), recurring: { interval: "month" }, product_data: { name: plan.name, description: "Assinatura Meu Financeiro Pessoal" } }, quantity: 1 }],
-      metadata: { user_id: user.id, plan_id: plan.id, plan_code: plan.code },
-      subscription_data: { metadata: { user_id: user.id, plan_id: plan.id, plan_code: plan.code } },
-      success_url: appUrl.replace(/\/$/,"") + "/?billing=success&session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: appUrl.replace(/\/$/,"") + "/?billing=cancelled",
+    const { data: existing } = await admin.from("subscriptions").select("id").eq("user_id",user.id).in("status",["active","trialing","incomplete"]).limit(1);
+    if (existing?.length) { res.status(409).json({ error: { code: "SUBSCRIPTION_EXISTS" } }); return; }
+    const { data: mapping } = await admin.from("asaas_customers").select("asaas_customer_id").eq("user_id",user.id).maybeSingle();
+    let customerId = mapping?.asaas_customer_id;
+    if (!customerId) {
+      const customer = await asaasRequest<{id:string}>("/customers",{method:"POST",body:{name,email:user.email,cpfCnpj,externalReference:user.id}});
+      customerId = customer.id;
+      const { error: saved } = await admin.from("asaas_customers").upsert({user_id:user.id,asaas_customer_id:customerId});
+      if (saved) throw saved;
+    }
+    const sub = await asaasRequest<{id:string}>("/subscriptions",{method:"POST",body:{
+      customer:customerId,billingType,value:Number(plan.price_monthly),nextDueDate:new Date().toISOString().slice(0,10),
+      cycle:"MONTHLY",description:"Meu Financeiro Pessoal - "+plan.name,externalReference:user.id
+    }});
+    const { error: inserted } = await admin.from("subscriptions").insert({
+      user_id:user.id,plan_id:plan.id,status:"incomplete",asaas_customer_id:customerId,asaas_subscription_id:sub.id
     });
-    res.status(200).json({ data: { checkout_url: session.url } });
+    if (inserted) throw inserted;
+    const charges = await asaasRequest<{data:Array<{id:string,invoiceUrl?:string}>}>("/subscriptions/"+encodeURIComponent(sub.id)+"/payments?limit=10");
+    res.status(200).json({data:{subscription_id:sub.id,payment_url:charges.data?.[0]?.invoiceUrl || null,status:"pending_payment"}});
   } catch (error) {
-    console.error("checkout_api_error",error);
-    res.status(502).json({ error: { code: "CHECKOUT_FAILED", message: "Não foi possível iniciar a cobrança. Tente novamente." } });
+    console.error("asaas_checkout_error",error);
+    res.status(502).json({error:{code:"CHECKOUT_FAILED",message:"Não foi possível iniciar a assinatura. Contate o suporte antes de tentar novamente."}});
   }
 }
