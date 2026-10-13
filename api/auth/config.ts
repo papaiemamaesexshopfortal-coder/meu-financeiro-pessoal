@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "../_lib/http";
 import { method } from "../_lib/supabase";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
