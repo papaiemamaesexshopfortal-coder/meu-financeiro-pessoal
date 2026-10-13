@@ -44,4 +44,6 @@ Android usa Capacitor 8.5.3 (SDK 36), Node 24 e Java 21 no CI. O workflow Androi
 
 ## Pagamentos
 
-Asaas está restrito a sandbox e usuários de teste explicitamente permitidos por `BILLING_TEST_USER_IDS`. A flag `BILLING_SANDBOX_ENABLED` é `false` por padrão; produção permanece bloqueada mesmo que a flag esteja ativa. Não ative a flag até preparar dados e credenciais de teste e revisar os itens pendentes de `docs/RELEASE_READINESS.md`.
+Asaas está restrito a sandbox e usuários de teste explicitamente permitidos por `BILLING_TEST_USER_IDS`. A flag `BILLING_SANDBOX_ENABLED` é `false` por padrão; produção permanece bloqueada mesmo que a flag esteja ativa. O checkout reserva a operação no banco, reconciliando resultados incertos sem repetir POSTs. Webhooks usam uma caixa de entrada durável e uma trava por assinatura; acesso e evento são atualizados na mesma transação. O cancelamento mantém o período já pago. O painel de Sandbox aparece apenas para usuários de teste permitidos.
+
+Aplique também `supabase/migrations/20261013185022_transactional_billing.sql` no ambiente isolado de testes antes de validar o fluxo. Não ative a flag até preparar dados e credenciais de teste e revisar os itens pendentes de `docs/RELEASE_READINESS.md`.
