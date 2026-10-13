@@ -22,7 +22,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq("user_id",user.id).in("status",["active","trialing","past_due","canceled"])
       .order("started_at",{ascending:false}).limit(1).maybeSingle();
     if (error) throw error;
-    const plan = sub?.plans as {code:string;name:string;features:Record<string,boolean>;limit_bank_accounts:number|null;limit_issuances:number|null}|null;
+    type Plan = {code:string;name:string;features:Record<string,boolean>;limit_bank_accounts:number|null;limit_issuances:number|null};
+    const joinedPlans = sub?.plans;
+    const plan = (Array.isArray(joinedPlans) ? joinedPlans[0] : joinedPlans) as Plan | null | undefined;
     const valid = !!sub && ["active","trialing"].includes(sub.status) && (!sub.expires_at || new Date(sub.expires_at).getTime()>Date.now());
     const allowed = valid && !!plan?.features?.[feature];
     if (!allowed) {
