@@ -1,50 +1,37 @@
-# Validação para comercialização — 13/10/2026
+# Entrega técnica — 13/10/2026
 
-## Verificado
+## Publicado e verificado
 
-- Repositório acessível com permissão de escrita; base auditada: `b1472754104bb78a6d5d95ddcdadae9a36349384`.
-- Supabase `mjiopkegmtmqwvvikxih`: ACTIVE_HEALTHY; RLS habilitada nas seis tabelas públicas auditadas.
-- Dados financeiros e categorias possuem políticas por proprietário. Assinaturas permitem leitura própria; dados internos de billing não possuem políticas de cliente, por projeto.
-- API pública de planos retorna R$ 0, R$ 39,90 e R$ 249,90.
-- Vinte e cinco testes locais cobrem cache, bloqueio de produção, conflitos, sessão antiga, login/logout em interface com mocks, persistência e atributos HTML de dados importados.
-- Limite de contas e documento inválido validados no banco em transação com tabela temporária e ROLLBACK; dados de clientes não modificados.
-- `npm audit` após correções: zero vulnerabilidades reportadas (produção e ferramentas), com versões fixadas e lockfile.
-- APK debug compilado com sucesso pelo GitHub Actions, execução `38447164284`, commit `e0e3a92e2d836c378c48a409f809547d46ffddfa`. Assets de login e sincronização conferidos dentro do APK. Isso não comprova funcionamento no aparelho.
+- PR #1 integrada em main; versão completa publicada pela Vercel.
+- Correção de execução das APIs: compilação NodeNext, compatível com Node. A falha FUNCTION_INVOCATION_FAILED encontrada no teste HTTP foi corrigida. Teste de carga dos módulos compilados incorporado à suíte.
+- 26 testes automatizados passaram, além de TypeScript/build. Última auditoria de dependências: zero vulnerabilidades reportadas.
+- Em produção: /api/plans e /api/auth/config retornam 200; assinatura, autorização, checkout e cancelamento sem sessão retornam 401; webhook bloqueado retorna 503 BILLING_VALIDATION_REQUIRED.
+- Login real concluído no navegador, sessão recuperada após recarregar e segunda aba autenticada automaticamente. Interface atualizada mostra Dados sincronizados e o plano Gratuito.
+- Gravação pela interface confirmada no Supabase: revisão avançou e o fingerprint do conteúdo permaneceu igual. Nenhum lançamento ou categoria de teste adicionado aos dados existentes.
+- Teste real com duas abas: a segunda gravação com revisão antiga foi bloqueada, mostrou conflito e preservou dados. Retomada pelo botão de sincronização concluída.
+- Migrações enforce_finance_account_limits e transactional_billing aplicadas após testes em transações desfeitas. Um documento financeiro existente preservado.
+- Teste no banco usando o papel authenticated: leitura/gravação própria, revisão de servidor, limite de contas e isolamento de outra identidade passaram, com ROLLBACK.
+- RLS habilitada nas tabelas internas novas; cliente autenticado não pode executar checkout administrativo nem ler inbox. Service role pode executar RPC de checkout.
+- Catálogo: Gratuito R$ 0 (1 conta), Premium R$ 39,90/mês (5 contas), Pro R$ 249,90/mês (10 contas). Contas antigas acima do limite são preservadas.
+- Premium oferece comparação mensal; Pro oferece demonstrativo gerencial por regime de caixa. DRE contábil, Open Finance, IA, emissão fiscal e cobranças para clientes não estão liberados.
+- APK debug compilado com sucesso no Actions (execução 38452072966, commit 013dfa870cfee9c863efddcbc1a5ef6b155e5445). Assets completos conferidos. SHA256: d8d857829601170879f1540345708159210256b5c905ff0796e21b20884270a9.
 
-## Bloqueios de lançamento
+## Pendências para comercialização
 
-1. **Asaas:** sem conector/credencial sandbox acessível nesta sessão. Reserva transacional, retomada sem novo POST após resultado incerto, CPF/CNPJ com dígitos verificadores e cancelamento foram implementados e testados localmente. Falta a validação end-to-end com a API real do Sandbox.
-2. **Webhook:** código atualizado persiste o identificador antes do processamento, adquire trava por assinatura, reconcilia o estado atual na API Asaas e confirma evento/acesso numa única transação. Valida cliente, referência, ciclo, valor e período; trata reembolso/cancelamento. A validação real do Sandbox continua pendente. Eventos de assinatura desconhecida agora retornam erro recuperável, evitando confirmação silenciosa.
-3. **Plano pago:** integrações bancária, IA, emissão fiscal e Pix/boleto para clientes não implementadas. O demonstrativo gerencial não equivale a DRE contábil. Não comercializar prometendo esses recursos.
-4. **Autenticação real:** testar dois usuários isolados, confirmação, recuperação, renovação de token, sessões simultâneas, reconexão e conflito entre aparelhos. Testes atuais de interface utilizam mocks e não substituem esse fluxo.
-5. **Vercel:** a primeira prévia falhou por exigir diretório `public`. `vercel.json` agora define explicitamente build e saída `www`. A nova prévia está READY (commit `5ca4acffdca61da1acd951cb4c07edb95266dbc6`), mas os testes autenticados ainda estão pendentes. o conector lista apenas `ph-service-fortal` na equipe PROJETOS; embora `get_project` retorne Meu Financeiro Pessoal, a leitura de metadados de ambiente funcionou sem escopo explícito, mas acesso à prévia protegida retorna 403 e logs retornam 404. As seis variáveis existentes estão apenas em produção; o ambiente preview não está configurado. Nenhum valor secreto foi lido. Endpoints públicos podem ser testados via HTTP. Necessário acesso efetivo ao projeto para revisar configuração, logs e ambientes.
-6. **Senhas:** advisor indica proteção contra senhas vazadas desativada. Validar disponibilidade do recurso no plano Supabase e configurar via acesso autorizado; não foi alterada.
-7. **Android:** validar APK em aparelho, anexos/downloads, links de autenticação e rede offline; preparar assinatura de release e distribuição. O pipeline gera debug, não release comercial.
-8. **Operação:** definir política de privacidade e termos com os dados do responsável, suporte, recuperação de backups, monitoramento e procedimentos de reembolso/cancelamento. Não inventar identidade jurídica.
+1. **Asaas Sandbox real:** falta acesso efetivo à conta de testes e configuração segura de credenciais exclusivas. A conta Sandbox é separada da produção. Nenhuma requisição de cobrança real executada.
+2. **Homologação de billing:** implementação e testes locais cobrem reserva única, retomada sem repetir POST após resultado incerto, CPF/CNPJ válido, leases, eventos repetidos, reconciliação canônica, pagamento/expiração, cancelamento e reembolso. Faltam evidências end-to-end contra a API real do Sandbox e seu webhook.
+3. **Autenticação completa:** confirmação e recuperação de e-mail, renovação prolongada de token e duas contas reais precisam de homologação específica. Os testes já realizados não substituem esses cenários.
+4. **Offline e aparelhos:** testar perda de rede, recuperação entre aparelhos e o APK em Android real, incluindo exportação/downloads e links de autenticação. O APK é debug; não é release comercial assinada nem publicação na Play Store.
+5. **Operação:** definir identidade jurídica, termos/privacidade, suporte, backups recuperáveis, monitoramento e procedimento de reembolso. Não inventar dados do responsável.
+6. **Proteção de senhas:** advisor Supabase indicou proteção contra senhas vazadas desativada. Validar disponibilidade e ativação no plano contratado.
+7. **Infraestrutura de homologação:** preparar ambiente isolado sem reutilizar chaves de produção no Sandbox. Preview ainda não tem configuração completa; o conector Vercel não fornece valores sensíveis existentes e a API de logs retorna acesso negado. A publicação funciona por GitHub; o acesso completo ao painel continua sem confirmação.
 
-## Critérios mínimos para liberar cobrança
+## Critério de liberação
 
-- Todos os testes sandbox de criação, pagamento, atraso, duplicação, cancelamento e reembolso concluídos com evidência.
-- Nenhum pagamento pendente concede acesso; acesso expira no período correto.
-- Repetições/concorrrência não geram cobrança nem assinatura duplicada.
-- Regras de planos impostas no servidor, com isolamento de usuários.
-- Versão web e Android aprovadas em testes reais; nenhum segredo em assets/repositório.
-- Configuração de produção revisada e liberação explícita registrada após a validação.
+**A versão web está publicada para uso e validação; venda de assinaturas permanece bloqueada.** Não ativar cobrança real somente para cumprir prazo.
 
-A verificação visual em Chromium local foi bloqueada porque o download do navegador retornou 403 por restrição de rede; testes DOM não substituem a revisão visual em aparelho.
+Para liberar pagamentos, concluir os cenários reais de criação, confirmação, atraso, repetição/concorrrência, eventos fora de ordem, cancelamento e reembolso no Sandbox; conferir concessão/revogação de acesso; aprovar web e Android em testes reais; revisar a configuração de produção e registrar a liberação após homologação.
 
-Nenhuma cobrança real, webhook do Asaas ou exclusão de dados existentes foi executada nesta sessão.
+Nenhuma chave secreta exposta, cobrança real ou exclusão de dados existentes executada. A gravação de teste preservou exatamente o conteúdo financeiro. O novo cache exclui APIs, autorização e respostas de terceiros; a interface antiga em cache foi superada carregando a versão atualizada.
 
-Assinaturas pagas sem período de acesso (`expires_at`) não concedem acesso na nova consulta de permissões. A implementação do webhook deverá estabelecer esse período após reconciliar o pagamento.
-
-A migração de limite ainda NÃO foi aplicada ao banco de produção; a versão está em PR, sem merge em main até concluir a validação do acesso protegido.
-
-Consulta de planos e permissões usa chave pública e JWT validado, respeitando RLS; service role fica restrita às rotinas administrativas de billing.
-
-## Continuidade após autorização de acesso
-
-- Testes do banco em tabelas temporárias e ROLLBACK passaram para reserva única de checkout, exclusão mútua por lease, idempotência, rollback de acesso inválido, isolamento do cancelamento e preservação do período pago. Nenhuma migração desta etapa foi aplicada à produção.
-- O Google confirmou a identidade do usuário. O fluxo escolhido (Vercel via ChatGPT) está na tela de consentimento de vínculo, com opção de consumir os limites do plano ChatGPT. Esse consentimento ainda não foi confirmado pelo agente.
-- O segredo Asaas existente não pode ser lido de volta pela API Vercel; a chamada retornou metadados sem valor. Não se deve presumir que é chave Sandbox.
-
-O teste SQL pode ser reproduzido gerando `node scripts/build-billing-db-test.js > /tmp/billing-db-test.sql` e executando o arquivo numa sessão PostgreSQL com as tabelas-base existentes. Usa somente tabelas temporárias, funções temporárias e ROLLBACK.
+Teste SQL de billing reproduzível: node scripts/build-billing-db-test.js > /tmp/billing-db-test.sql, executar em sessão PostgreSQL com tabelas-base. Usa tabelas/funções temporárias e ROLLBACK.

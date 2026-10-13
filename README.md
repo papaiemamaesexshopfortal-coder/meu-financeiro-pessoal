@@ -26,7 +26,7 @@ Use um servidor HTTP para abrir a interface. Os endpoints TypeScript em `api/` r
 
 Os dados e alterações pendentes ficam em uma chave por usuário. Escritas usam a revisão do documento; um conflito entre dispositivos pausa a sincronização e preserva a cópia local. Exporte o backup antes de resolver um conflito. Atualizar a tela ou renovar o token não escreve dados. Sair da conta não apaga o documento financeiro.
 
-Aplique `supabase/migrations/20261013182027_enforce_finance_account_limits.sql` junto da nova interface, após validação. O trigger impõe o limite de contas e gera revisões no servidor sem remover contas existentes. Não execute migrações antigas sobre o banco existente sem comparar seu histórico.
+As migrações de limites e billing de 13/10/2026 foram aplicadas ao projeto existente após testes com ROLLBACK. O trigger impõe o limite de contas e gera revisões no servidor sem remover contas existentes. Não reaplique essas migrações nem execute migrações antigas sem comparar o histórico do banco.
 
 ## Android
 
@@ -46,4 +46,4 @@ Android usa Capacitor 8.5.3 (SDK 36), Node 24 e Java 21 no CI. O workflow Androi
 
 Asaas está restrito a sandbox e usuários de teste explicitamente permitidos por `BILLING_TEST_USER_IDS`. A flag `BILLING_SANDBOX_ENABLED` é `false` por padrão; produção permanece bloqueada mesmo que a flag esteja ativa. O checkout reserva a operação no banco, reconciliando resultados incertos sem repetir POSTs. Webhooks usam uma caixa de entrada durável e uma trava por assinatura; acesso e evento são atualizados na mesma transação. O cancelamento mantém o período já pago. O painel de Sandbox aparece apenas para usuários de teste permitidos.
 
-Aplique também `supabase/migrations/20261013185022_transactional_billing.sql` no ambiente isolado de testes antes de validar o fluxo. Não ative a flag até preparar dados e credenciais de teste e revisar os itens pendentes de `docs/RELEASE_READINESS.md`.
+A migração `supabase/migrations/20261013185022_transactional_billing.sql` está aplicada, mas o processamento permanece desativado. No ambiente isolado de homologação, prepare dados e credenciais de teste antes de ativar a flag. Revise os itens pendentes de `docs/RELEASE_READINESS.md`.
