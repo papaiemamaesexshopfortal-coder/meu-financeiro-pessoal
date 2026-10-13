@@ -15,7 +15,7 @@ begin
   select p.limit_bank_accounts into account_limit
     from public.subscriptions s join public.plans p on p.id=s.plan_id
     where s.user_id=new.user_id and s.status in ('active','trialing')
-      and (s.expires_at is null or s.expires_at > now()) and p.is_active
+      and ((p.code='free' and s.expires_at is null) or s.expires_at > now()) and p.is_active
     order by s.started_at desc limit 1;
   if not found then
     select p.limit_bank_accounts into account_limit from public.plans p where p.code='free' and p.is_active;
@@ -34,3 +34,6 @@ revoke all on function public.enforce_finance_account_limits() from public, anon
 create trigger enforce_finance_account_limits
 before insert or update on public.user_finance_data
 for each row execute function public.enforce_finance_account_limits();
+
+-- Keep new installs aligned with the published catalog. Existing subscription rows are untouched.
+update public.plans set price_monthly=case code when 'premium' then 39.90 when 'mei_pme_pro' then 249.90 else 0 end where code in ('free','premium','mei_pme_pro');

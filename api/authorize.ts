@@ -9,7 +9,7 @@ export default async function handler(req:VercelRequest,res:VercelResponse){
  const feature=req.body?.feature;
  if(typeof feature!=='string'||!known.has(feature))return res.status(400).json({error:{code:'UNKNOWN_FEATURE'}});
  if(!implementedFeatures.has(feature))return res.status(501).json({error:{code:'FEATURE_NOT_RELEASED',message:'Recurso em desenvolvimento, indisponível para contratação.'}});
- try{const {plan}=await effectivePlan(user.id);if(!(plan.features as Record<string,boolean>)?.[feature])return res.status(403).json({error:{code:'FEATURE_LOCKED',message:'Recurso indisponível no plano atual.'}});
+ try{const {plan}=await effectivePlan(user.id,req.headers.authorization!.slice(7));if(!(plan.features as Record<string,boolean>)?.[feature])return res.status(403).json({error:{code:'FEATURE_LOCKED',message:'Recurso indisponível no plano atual.'}});
  return res.status(200).json({data:{allowed:true,feature,plan:plan.code}});}
  catch{return res.status(503).json({error:{code:'AUTHORIZATION_UNAVAILABLE'}});}
 }

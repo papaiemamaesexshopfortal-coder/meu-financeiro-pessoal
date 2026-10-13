@@ -31,3 +31,14 @@ test('refresh and sign-out never persist an empty previous profile',()=>{
  assert.equal(html.includes("await client.auth.signOut();db=seed();refresh()"),false);
  assert.equal(html.includes("await import('https://esm.sh/"),false);
 });
+
+import {hasPlanAccess} from '../api/_lib/entitlements';
+test('paid plans require a current access period and settled subscription state',()=>{
+ const now=Date.parse('2026-10-13T00:00:00Z');
+ assert.equal(hasPlanAccess('premium','active',null,now),false);
+ assert.equal(hasPlanAccess('premium','active','2026-10-12T00:00:00Z',now),false);
+ assert.equal(hasPlanAccess('premium','active','invalid',now),false);
+ assert.equal(hasPlanAccess('premium','past_due','2026-11-13T00:00:00Z',now),false);
+ assert.equal(hasPlanAccess('premium','active','2026-11-13T00:00:00Z',now),true);
+ assert.equal(hasPlanAccess('free','active',null,now),true);
+});
