@@ -178,7 +178,7 @@ $('#userName').value=db.profile.name||'';
 initMonth();fillFilters();refresh();
 async function initializeAuth(){
  const errorEl=$('#authError');let client;
- try { const configResponse=await fetch('/api/auth/config',{cache:'no-store'});if(!configResponse.ok)throw Error('Configuração de login indisponível.');const config=await configResponse.json();const sdk=await import('https://esm.sh/@supabase/supabase-js@2.57.4');client=sdk.createClient(config.url,config.anonKey); }catch(err){errorEl.textContent='Não foi possível iniciar o login. Atualize a página mais tarde.';return}
+ try { let config={url:'https://mjiopkegmtmqwvvikxih.supabase.co',anonKey:'sb_publishable_DZ3P7BLW-rZSyFB12HJclA_ddEc1Tpl'};try{const response=await fetch('/api/auth/config',{cache:'no-store'});if(response.ok){const serverConfig=await response.json();if(serverConfig.url&&serverConfig.anonKey)config=serverConfig}}catch(_){}const sdk=await import('https://esm.sh/@supabase/supabase-js@2.57.4');client=sdk.createClient(config.url,config.anonKey); }catch(err){errorEl.textContent='Não foi possível iniciar o login. Atualize a página mais tarde.';return}
  const showUser=async(session)=>{if(!session?.user){document.body.classList.remove('signed-in');$('#authScreen').classList.remove('auth-hidden');return}KEY='meu-financeiro-v1-user-'+session.user.id;db=load();$('#userName').value=db.profile.name||'';$('#authProfile').textContent=(session.user.email||'U').charAt(0).toUpperCase();document.body.classList.add('signed-in');$('#authScreen').classList.add('auth-hidden');refresh()};
  const {data:{session}}=await client.auth.getSession();await showUser(session);
  client.auth.onAuthStateChange((_event,session)=>{void showUser(session)});
