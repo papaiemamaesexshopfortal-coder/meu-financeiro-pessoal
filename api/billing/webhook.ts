@@ -17,9 +17,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   try {
     const { admin } = clients();
-    const { error: inserted } = await admin.from("billing_events").insert({ provider_event_id: event.id, event_type: event.type });
-    if (inserted && inserted.code === "23505") { res.status(200).json({ received: true, duplicate: true }); return; }
-    if (inserted) throw inserted;
+    const { data: prior } = await admin.from("billing_events").select("provider_event_id").eq("provider_event_id",event.id).maybeSingle();
+    if (prior) { res.status(200).json({ received: true, duplicate: true }); return; }
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.user_id, planId = session.metadata?.plan_id;
@@ -41,6 +40,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { error } = await admin.from("subscriptions").update({ status, expires_at: new Date(sub.current_period_end*1000).toISOString(), canceled_at: sub.canceled_at ? new Date(sub.canceled_at*1000).toISOString() : null, updated_at: new Date().toISOString() }).eq("stripe_subscription_id",sub.id);
       if (error) throw error;
     }
+    const { error: logged } = await admin.from("billing_events").insert({ provider_event_id: event.id, event_type: event.type });
+    if (logged && logged.code !== "23505") throw logged;
     res.status(200).json({ received: true });
   } catch (error) {
     console.error("stripe_webhook_processing_error",error);
