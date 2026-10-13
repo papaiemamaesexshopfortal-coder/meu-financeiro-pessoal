@@ -35,6 +35,8 @@ jobs:
         run: npx cap add android
       - name: Sync Capacitor
         run: npx cap sync android
+      - name: Apply finance illustration as Android app icon
+        run: node scripts/set-android-icon.js
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
