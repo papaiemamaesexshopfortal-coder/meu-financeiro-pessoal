@@ -1,0 +1,17 @@
+{
+  "name": "meu-financeiro-pessoal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicativo financeiro pessoal",
+  "scripts": {
+    "copy:web": "node scripts/copy-web.js",
+    "android:sync": "npm run copy:web && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.1"
+  }
+}
