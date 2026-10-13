@@ -1,0 +1,6 @@
+{
+  "appId": "br.com.meufinanceiropessoal.app",
+  "appName": "Meu Financeiro Pessoal",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
