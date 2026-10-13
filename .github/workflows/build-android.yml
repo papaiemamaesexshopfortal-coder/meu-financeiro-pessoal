@@ -11,6 +11,8 @@ on:
       - 'package-lock.json'
       - 'capacitor.config.json'
       - 'scripts/**'
+      - 'api/**'
+      - 'supabase/**'
       - '.github/workflows/build-android.yml'
   workflow_dispatch:
 
@@ -29,6 +31,8 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm install
+      - name: Validate inline JavaScript syntax
+        run: node scripts/check-inline-js.js
       - name: Prepare web assets
         run: npm run copy:web
       - name: Add Android platform
