@@ -1,9 +1,12 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "../_lib/http";
 import { clients, method } from "../_lib/supabase";
 import { timingSafeEqual } from "node:crypto";
+import { billingEnabled } from "../_lib/billing-safety";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!method(req, res, ["POST"])) return;
+  res.setHeader("Cache-Control", "no-store");
+  if (!billingEnabled()) return res.status(503).json({error:"BILLING_VALIDATION_REQUIRED"});
   const expected = process.env.ASAAS_WEBHOOK_TOKEN;
   const supplied = req.headers["asaas-access-token"];
   const token = typeof supplied === "string" ? supplied : "";
@@ -23,6 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (typeof subscriptionId === "string") {
       const { data: sub, error: findError } = await admin.from("subscriptions").select("id,status").eq("asaas_subscription_id", subscriptionId).maybeSingle();
       if (findError) throw findError;
+      if (!sub) return res.status(503).json({error:"SUBSCRIPTION_NOT_READY"});
       if (sub) {
         let status: string | undefined;
         if (["PAYMENT_RECEIVED","PAYMENT_CONFIRMED"].includes(event.event)) status = "active";

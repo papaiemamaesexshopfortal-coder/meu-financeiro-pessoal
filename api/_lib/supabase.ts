@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "./http";
 
 export function clients() {
   const url = process.env.SUPABASE_URL;
@@ -27,6 +27,13 @@ export async function requireUser(req: VercelRequest, res: VercelResponse) {
   }
 }
 export function method(req: VercelRequest, res: VercelResponse, allowed: string[]) {
+  const origin=req.headers.origin;
+  if (typeof origin === "string" && ["https://localhost","http://localhost","capacitor://localhost","https://meu-financeiro-pessoal-five.vercel.app"].includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin",origin);res.setHeader("Vary","Origin");
+    res.setHeader("Access-Control-Allow-Headers","Authorization, Content-Type");
+    res.setHeader("Access-Control-Allow-Methods",allowed.join(", "));
+    if(req.method==="OPTIONS"){res.status(204).end();return false;}
+  }
   if (!allowed.includes(req.method || "")) { res.setHeader("Allow", allowed.join(", ")); res.status(405).json({ error: { code: "METHOD_NOT_ALLOWED" } }); return false; }
   return true;
 }

@@ -1,10 +1,15 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "../_lib/http";
 import { clients, method, requireUser } from "../_lib/supabase";
 import { asaasRequest } from "../_lib/asaas";
+import { billingEnabled, sandboxUserAllowed } from "../_lib/billing-safety";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!method(req,res,["POST"])) return;
   const user = await requireUser(req,res); if (!user) return;
+  res.setHeader("Cache-Control", "no-store");
+  if (!billingEnabled() || !sandboxUserAllowed(user.id)) {
+    return res.status(503).json({error:{code:"BILLING_VALIDATION_REQUIRED",message:"Assinaturas em validação. Cobranças indisponíveis."}});
+  }
   const code = req.body?.plan_code;
   const name = String(req.body?.name || "").trim();
   const cpfCnpj = String(req.body?.cpf_cnpj || "").replace(/[^0-9]/g, "");
