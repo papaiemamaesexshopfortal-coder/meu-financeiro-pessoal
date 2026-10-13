@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@capacitor/android": "^6.2.1",
-    "@capacitor/cli": "^6.2.1"
+    "@capacitor/cli": "^6.2.1",
+    "sharp": "^0.34.3"
   }
 }
