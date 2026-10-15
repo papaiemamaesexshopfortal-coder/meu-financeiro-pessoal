@@ -8,7 +8,9 @@
 - CSV neutraliza fórmulas em campos textuais e preserva separadores, aspas e quebras de linha ao importar. Exportação Android usa Filesystem/Share nativos para CSV e JSON.
 - Interface extraída para app.js, com política CSP de scripts locais, proteção contra framing, atributos executáveis e vazamento de Referer.
 - Workflow manual de APK/AAB assinados preparado, com keystore e senhas restritos a secrets e sem publicação automática. Não foi executado com credenciais reais. Ver docs/ANDROID_RELEASE.md.
-- Este conjunto ainda precisa de confirmação do deployment e do novo build Android no CI; não substitui os testes de pagamentos reais no Sandbox nem a homologação em aparelho.
+- Publicação READY confirmada no commit e3df376370f408f8f3b13d919bee4ad574e1f62b; HTTP confirmou CSP, catálogo, assets íntegros, configuração pública 200, sessão ausente 401 e webhook bloqueado 503. JavaScript da interface executou no navegador com 13 meses inicializados e sem erros do aplicativo.
+- Novo APK debug compilado no GitHub Actions, execução 38720995976, job 116375221415. Assets conferidos byte a byte, plugins Filesystem/Share presentes e logging nativo desativado. SHA256: 7113c80a18b6045786ac6aa91e1d09f9413594918bf1d8f66f338a0d420961f7 (4.476.164 bytes).
+- Não houve nova migração, cobrança real nem alteração de dados financeiros nesta continuidade. Testes reais do Asaas Sandbox e homologação do APK em aparelho continuam pendentes.
 
 ## Publicado e verificado
 
