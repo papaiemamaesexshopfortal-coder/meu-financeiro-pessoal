@@ -20,6 +20,7 @@
 - iOS compilado com sucesso no Xcode 26.3, Actions 38722858028; artefato de simulador 11966852593. iPhone/iPad, plugins Filesystem/Share, ícone e manifesto de privacidade preparados. Não foi executado em aparelho físico.
 - APK atualizado compilado com sucesso, Actions 38722858063, job 116381445409, artefato 11966792765. HTML, scripts e módulos conferidos byte a byte; ícones e plugins nativos presentes. SHA256: 881d27f4318c5e2ab238aa8caf5a69c850576fcfae75825a27727e5ebd000ff4 (4.622.772 bytes). Continua sendo debug para testes.
 - Auditoria completa de dependências, incluindo desenvolvimento: zero vulnerabilidades reportadas.
+- Commit de segurança 17e1a1a81ea4f25d7531d9b822c5015c4d8d18b2: Vercel READY; CI Windows/Linux/macOS verde (38726047938), APK debug recompilado com sucesso (38726047982).
 - APK é exclusivo do Android. Não há pacote universal nem executáveis de desktop. iOS nativo exige assinatura Apple e homologação em aparelho; compilação para simulador não é IPA para distribuição.
 
 
