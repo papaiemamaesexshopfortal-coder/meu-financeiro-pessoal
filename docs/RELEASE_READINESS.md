@@ -2,6 +2,16 @@
 
 ## Continuidade — 15/10/2026
 
+### Revisão de segurança para comercialização — 15/10/2026
+
+- Aplicada no Supabase a migração `20261015111307_billing_minimum_access`: removeu privilégios diretos `anon`/`authenticated` nas quatro tabelas internas de cobrança; `service_role` manteve leitura e as rotinas do servidor. Ajustou as políticas de titularidade de `subscriptions` e `user_categories` para avaliar `auth.uid()` uma vez por consulta e criou o índice de `subscriptions.plan_id`. Sem operações em dados financeiros existentes.
+- Verificação posterior confirmou: privilégios diretos dos clientes negados e do serviço mantidos; políticas continuam limitadas ao dono; índice registrado. O advisor deixou de apontar os dois problemas de custo das políticas e a FK sem índice. Os apontamentos `RLS enabled without policy` são informativos e intencionais nas tabelas fechadas por ACL.
+- Suíte final local: 37 testes aprovados, TypeScript/build aprovados, `npm audit` reportou zero vulnerabilidades. A regra testada bloqueia billing em production até mesmo com a flag de sandbox ligada.
+- Bloqueio remanescente: o Supabase Advisor informa que a proteção de senha vazada está desligada. A documentação do Supabase limita esse controle ao plano Pro ou superior; o plano atual autorizado permanece sem custo mensal. Não alterei o plano nem gerei custo.
+- Comercialização de assinaturas continua bloqueada: não há homologação real no Asaas Sandbox (API key exclusiva, cliente/assinatura de teste, eventos webhook, cancelamento e reconciliação); produção segue hard-blocked no código e nenhum webhook de cobrança foi habilitado. O conector Vercel não permitiu consultar metadados dos environment variables (404), então não confirmei se as variáveis atuais e flags de produção correspondem ao bloqueio.
+- Também faltam informações do responsável para publicar termos, aviso de privacidade, canal de atendimento e política de reembolso; nenhum texto ou contato legal foi inventado. O artigo 9º da LGPD prevê informações claras, adequadas e ostensivas sobre o tratamento (https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm). A homologação Asaas deve usar exclusivamente chave e URL de Sandbox e testar recebimento de webhook conforme a documentação oficial (https://docs.asaas.com/docs/sandbox, https://docs.asaas.com/docs/receba-eventos-do-asaas-no-seu-endpoint-de-webhook).
+
+
 ### Instalação em cinco sistemas
 
 - Commit 79d9087a0c1f75d609ffdbc9bcb86e5f28675a67 publicado com sucesso na Vercel. HTML, installation.js, manifesto e quatro ícones retornaram HTTP 200 e coincidem byte a byte com o build local. Ajuda dos cinco sistemas aberta e conferida no navegador em produção.
