@@ -5,7 +5,10 @@ on:
     branches: [main, 'release/hardening-20261013']
     paths:
       - 'index.html'
+      - 'app.js'
       - 'cloud-sync.mjs'
+      - 'file-export.mjs'
+      - 'native-files.js'
       - 'vendor/**'
       - 'manifest.webmanifest'
       - 'icon.svg'
@@ -45,6 +48,8 @@ jobs:
         run: npx cap sync android
       - name: Apply finance illustration as Android app icon
         run: node scripts/set-android-icon.js
+      - name: Set Android version
+        run: node scripts/configure-android-release.js
       - name: Set up Java
         uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
         with:

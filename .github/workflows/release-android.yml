@@ -1,0 +1,72 @@
+name: Build signed Android release
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Android version code (increase for every release)
+        required: true
+        default: '1'
+        type: string
+permissions:
+  contents: read
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    environment: android-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build && npm run typecheck && npm test
+      - run: npm run copy:web && npx cap add android && npx cap sync android
+      - run: node scripts/set-android-icon.js
+      - name: Configure release metadata
+        run: node scripts/configure-android-release.js
+        env:
+          ANDROID_VERSION_CODE: ${{ inputs.version_code }}
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Restore private signing key
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python - <<'PY'
+          import base64, os
+          from pathlib import Path
+          required = ['ANDROID_KEYSTORE_BASE64','ANDROID_KEYSTORE_PASSWORD','ANDROID_KEY_ALIAS','ANDROID_KEY_PASSWORD']
+          if not all(os.environ.get(key) for key in required):
+              raise SystemExit('Configure the four Android signing secrets in the android-release environment.')
+          output = Path(os.environ['RUNNER_TEMP']) / 'finance-release.jks'
+          output.write_bytes(base64.b64decode(os.environ['ANDROID_KEYSTORE_BASE64'], validate=True))
+          output.chmod(0o600)
+          PY
+      - name: Build signed APK and App Bundle
+        working-directory: android
+        env:
+          ANDROID_SIGNED_RELEASE: 'true'
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/finance-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease bundleRelease
+      - name: Remove temporary private key
+        if: always()
+        run: rm -f -- "$RUNNER_TEMP/finance-release.jks"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: meu-financeiro-pessoal-signed-release
+          path: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14

@@ -1,5 +1,15 @@
 # Entrega técnica — 13/10/2026
 
+## Continuidade — 15/10/2026
+
+- 35 testes locais passaram, TypeScript/build passaram e auditoria de dependências não reportou vulnerabilidades.
+- Catálogo público e permissões agora expõem somente recursos implementados; recursos planejados ficam identificados como planejados e emissão fiscal tem limite público zero. Plano desativado não concede acesso.
+- Erros de limite de contas, documento inválido e sessão sem permissão são diferenciados de indisponibilidade de rede. A conexão restabelecida tenta retomar a sincronização respeitando a revisão.
+- CSV neutraliza fórmulas em campos textuais e preserva separadores, aspas e quebras de linha ao importar. Exportação Android usa Filesystem/Share nativos para CSV e JSON.
+- Interface extraída para app.js, com política CSP de scripts locais, proteção contra framing, atributos executáveis e vazamento de Referer.
+- Workflow manual de APK/AAB assinados preparado, com keystore e senhas restritos a secrets e sem publicação automática. Não foi executado com credenciais reais. Ver docs/ANDROID_RELEASE.md.
+- Este conjunto ainda precisa de confirmação do deployment e do novo build Android no CI; não substitui os testes de pagamentos reais no Sandbox nem a homologação em aparelho.
+
 ## Publicado e verificado
 
 - PR #1 integrada em main; versão completa publicada pela Vercel.

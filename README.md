@@ -20,6 +20,8 @@ npm run copy:web
 
 O SDK Supabase é empacotado em `vendor/supabase.js`; o APK não depende de importação de código de um CDN. O arquivo gerado é versionado para a publicação estática existente. Não altere arquivos de `vendor` manualmente.
 
+O código da interface está em `app.js`, carregado por `index.html`. A política de segurança permite scripts locais e bloqueia scripts inline, atributos executáveis e incorporação em páginas de terceiros. CSV exportado neutraliza fórmulas e o leitor preserva campos com separadores e múltiplas linhas.
+
 Use um servidor HTTP para abrir a interface. Os endpoints TypeScript em `api/` rodam como Vercel Functions. Variáveis de configuração estão em `.env.example`; valores secretos ficam exclusivamente no servidor.
 
 ## Sincronização
@@ -36,11 +38,14 @@ npm run copy:web
 npx cap add android
 npx cap sync android
 node scripts/set-android-icon.js
+node scripts/configure-android-release.js
 cd android
 ./gradlew assembleDebug
 ```
 
 Android usa Capacitor 8.5.3 (SDK 36), Node 24 e Java 21 no CI. O workflow Android usa `npm ci`, verifica código e testes e gera **APK de depuração**, destinado a testes. Não é uma versão assinada de comercialização. Login e recuperação de senha precisam de teste em aparelho; os links de e-mail atualmente abrem a versão web. Exportação de arquivos no WebView também precisa de validação em aparelho. Publicação na Google Play exige assinatura, revisão do SDK/target API exigido, declaração de privacidade e definição da política de pagamento aplicável.
+
+No Android, CSV e JSON são escritos no cache privado e abrem a seleção nativa de destino. No navegador, continuam usando download. O workflow manual `Build signed Android release` prepara APK e App Bundle com uma chave de assinatura fornecida por secrets; ele não publica na loja. Procedimento em `docs/ANDROID_RELEASE.md`.
 
 ## Pagamentos
 

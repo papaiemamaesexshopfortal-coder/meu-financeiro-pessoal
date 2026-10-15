@@ -13,7 +13,7 @@ async function fixture(initial={accounts:[{id:'a',name:'Conta',type:'Conta corre
  const q={select:()=>q,eq:()=>q,maybeSingle:async()=>({data:{data:initial,updated_at:'2026-01-01T00:00:00.000Z'}}),update:()=>{writes++;return q},insert:()=>{writes++;return q}};
  const client={from:()=>q,auth:{getSession:async()=>({data:{session}}),onAuthStateChange:f=>callback=f,signOut:async()=>{session=null;callback('SIGNED_OUT',null);return {}},signInWithPassword:async()=>({}),signUp:async()=>({data:{},error:null}),resetPasswordForEmail:async()=>({})}};
  w.__sdk={createClient:()=>client};w.__sync={FinanceSync};
- let source=html.match(/<script>([\s\S]*?)<\/script>/)[1].replace("import('./vendor/supabase.js')","Promise.resolve(window.__sdk)").replace("import('./cloud-sync.mjs')","Promise.resolve(window.__sync)");
+ let source=readFileSync('app.js','utf8').replace("import('./vendor/supabase.js')","Promise.resolve(window.__sdk)").replace("import('./cloud-sync.mjs')","Promise.resolve(window.__sync)");
  w.eval(source);await new Promise(r=>setTimeout(r,60));
  return {dom,w,errors,getWrites:()=>writes};
 }

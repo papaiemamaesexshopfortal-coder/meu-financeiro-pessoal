@@ -8,7 +8,7 @@ export class FinanceSync {
   }
   async load(local) {
     const { data, error } = await this.client.from('user_finance_data').select('data,updated_at').eq('user_id', this.userId).maybeSingle();
-    if (error) throw new Error('OFFLINE');
+    if (error) throw this.classify(error);
     if (this.stopped) throw new Error('SESSION_CHANGED');
     if (this.pending) {
       if ((data?.updated_at || null) !== this.revision) throw new Error('SYNC_CONFLICT');
@@ -32,10 +32,15 @@ export class FinanceSync {
     const { data, error } = await query.select('updated_at').maybeSingle();
     if (this.stopped) return;
     if (error?.code === '23505' || (!error && !data)) throw new Error('SYNC_CONFLICT');
-    if (error) throw new Error('OFFLINE');
+    if (error) throw this.classify(error);
     this.revision = data.updated_at;
     this.storeRevision();
   }
   acknowledge() { this.pending = false; this.storage.removeItem(this.key + ':pending'); }
+  classify(error) {
+    if(error.code==='23514')return new Error(error.message?.includes('ACCOUNT_LIMIT_EXCEEDED')?'ACCOUNT_LIMIT_EXCEEDED':'INVALID_FINANCE_DOCUMENT');
+    if(['42501','PGRST301','PGRST302','PGRST303'].includes(error.code))return new Error('SYNC_ACCESS_DENIED');
+    return new Error('OFFLINE');
+  }
   stop() { this.stopped = true; }
 }

@@ -25,11 +25,19 @@ test('service worker never intercepts API, authenticated or third-party response
 });
 
 test('refresh and sign-out never persist an empty previous profile',()=>{
- const html=readFileSync('index.html','utf8');
+ const html=readFileSync('app.js','utf8');
  const refresh=html.slice(html.indexOf('function refresh()'),html.indexOf('function fillFilters()'));
  assert.equal(refresh.includes('persist()'),false);
  assert.equal(html.includes("await client.auth.signOut();db=seed();refresh()"),false);
  assert.equal(html.includes("await import('https://esm.sh/"),false);
+});
+test('deployed web allows local scripts while denying inline handlers, frames and object content',()=>{
+ const config=JSON.parse(readFileSync('vercel.json','utf8'));
+ const headers=Object.fromEntries(config.headers.find((rule:any)=>rule.source==='/(.*)').headers.map((header:any)=>[header.key,header.value]));
+ const policy=headers['Content-Security-Policy'];
+ assert.match(policy,/script-src 'self';/);assert.match(policy,/script-src-attr 'none'/);assert.match(policy,/frame-ancestors 'none'/);assert.match(policy,/object-src 'none'/);
+ assert.equal(headers['X-Content-Type-Options'],'nosniff');assert.equal(headers['Referrer-Policy'],'no-referrer');
+ const html=readFileSync('index.html','utf8');assert.ok(html.includes('<script defer src="./app.js"></script>'));assert.doesNotMatch(html,/<script(?![^>]*\bsrc=)/i);
 });
 
 import {hasPlanAccess} from '../api/_lib/entitlements';

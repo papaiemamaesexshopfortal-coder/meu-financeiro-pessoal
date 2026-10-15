@@ -21,3 +21,9 @@ test('new profile insert collision never becomes an overwriting upsert',async()=
 test('old session requests cannot acknowledge or save a different profile',async()=>{
  const s=storage(),c=client({data:{updated_at:'new'}}),sync=new FinanceSync(c,'old-user',s,'old');sync.stop();await sync.save({});assert.equal(c.calls.length,0);
 });
+test('server validation and permission failures preserve pending edits with distinct actionable errors',async()=>{
+ for(const [error,message] of [[{code:'23514',message:'ACCOUNT_LIMIT_EXCEEDED'},'ACCOUNT_LIMIT_EXCEEDED'],[{code:'23514',message:'INVALID_FINANCE_DOCUMENT'},'INVALID_FINANCE_DOCUMENT'],[{code:'42501'},'SYNC_ACCESS_DENIED'],[{code:'PGRST301'},'SYNC_ACCESS_DENIED'],[{message:'network unavailable'},'OFFLINE']]){
+  const s=storage();s.setItem('user:revision','old');const sync=new FinanceSync(client({error}),'u',s,'user');sync.markPending();
+  await assert.rejects(sync.save({accounts:[]}),{message});assert.equal(s.getItem('user:pending'),'true');assert.equal(s.getItem('user:revision'),'old');
+ }
+});

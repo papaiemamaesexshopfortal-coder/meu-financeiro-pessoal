@@ -6,12 +6,14 @@
   "scripts": {
     "copy:web": "node scripts/copy-web.js",
     "android:sync": "npm run copy:web && cap sync android",
-    "build": "node scripts/bundle-sdk.js && node scripts/check-inline-js.js",
+    "build": "node scripts/bundle-sdk.js && node scripts/check-inline-js.js && node scripts/security-headers.js",
     "test": "node --import tsx --test tests/*.test.*",
     "typecheck": "tsc"
   },
   "dependencies": {
     "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.4",
+    "@capacitor/share": "8.0.3",
     "@supabase/supabase-js": "2.57.4"
   },
   "devDependencies": {
