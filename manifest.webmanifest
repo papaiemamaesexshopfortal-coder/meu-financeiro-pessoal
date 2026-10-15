@@ -3,9 +3,16 @@
   "short_name": "Meu Financeiro",
   "description": "Controle pessoal de receitas, despesas, contas e metas.",
   "lang": "pt-BR",
+  "id": "/",
+  "scope": "./",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f8f8",
   "theme_color": "#073b35",
-  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [
+    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"},
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
 }

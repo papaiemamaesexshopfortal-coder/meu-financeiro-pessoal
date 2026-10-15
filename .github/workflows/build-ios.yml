@@ -1,0 +1,45 @@
+name: Build iOS simulator
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '*.js'
+      - '*.mjs'
+      - 'icons/**'
+      - 'vendor/**'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'package*.json'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - '.github/workflows/build-ios.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-ios:
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build && npm run typecheck && npm test
+      - run: npm run copy:web && npx cap add ios && npx cap sync ios
+      - run: node scripts/configure-ios.js
+      - name: Compile iPhone and iPad app for simulator
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-build CODE_SIGNING_ALLOWED=NO build
+      - name: Package simulator application
+        run: ditto -c -k --sequesterRsrc --keepParent ios-build/Build/Products/Debug-iphonesimulator/App.app ios-simulator.zip
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: meu-financeiro-pessoal-ios-simulator
+          path: ios-simulator.zip
+          if-no-files-found: error
+          retention-days: 14

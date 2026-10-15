@@ -1,5 +1,5 @@
-const CACHE = 'meu-financeiro-static-v4';
-const CORE = ['./index.html', './app.js', './manifest.webmanifest', './icon.svg', './vendor/supabase.js', './cloud-sync.mjs', './file-export.mjs', './vendor/native-files.js'];
+const CACHE = 'meu-financeiro-static-v5';
+const CORE = ['./index.html', './app.js', './installation.js', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './manifest.webmanifest', './icon.svg', './vendor/supabase.js', './cloud-sync.mjs', './file-export.mjs', './vendor/native-files.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });
