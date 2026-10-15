@@ -2,6 +2,17 @@
 
 ## Continuidade — 15/10/2026
 
+### Instalação em cinco sistemas
+
+- Commit 79d9087a0c1f75d609ffdbc9bcb86e5f28675a67 publicado com sucesso na Vercel. HTML, installation.js, manifesto e quatro ícones retornaram HTTP 200 e coincidem byte a byte com o build local. Ajuda dos cinco sistemas aberta e conferida no navegador em produção.
+- 37 testes passaram localmente. Instalação limpa, build, TypeScript, todos os testes e cópia web passaram no Windows, Linux e macOS pelo Actions 38722858204.
+- PWA com ícones PNG, ícone maskable, Apple touch icon, escopo e identidade; instruções disponíveis antes do login e nas configurações. iOS/iPadOS pelo Safari; Windows/Linux/macOS por navegador compatível. Ver docs/PLATFORMS.md.
+- iOS compilado com sucesso no Xcode 26.3, Actions 38722858028; artefato de simulador 11966852593. iPhone/iPad, plugins Filesystem/Share, ícone e manifesto de privacidade preparados. Não foi executado em aparelho físico.
+- APK atualizado compilado com sucesso, Actions 38722858063, job 116381445409, artefato 11966792765. HTML, scripts e módulos conferidos byte a byte; ícones e plugins nativos presentes. SHA256: 881d27f4318c5e2ab238aa8caf5a69c850576fcfae75825a27727e5ebd000ff4 (4.622.772 bytes). Continua sendo debug para testes.
+- Auditoria completa de dependências, incluindo desenvolvimento: zero vulnerabilidades reportadas.
+- APK é exclusivo do Android. Não há pacote universal nem executáveis de desktop. iOS nativo exige assinatura Apple e homologação em aparelho; compilação para simulador não é IPA para distribuição.
+
+
 - 35 testes locais passaram, TypeScript/build passaram e auditoria de dependências não reportou vulnerabilidades.
 - Catálogo público e permissões agora expõem somente recursos implementados; recursos planejados ficam identificados como planejados e emissão fiscal tem limite público zero. Plano desativado não concede acesso.
 - Erros de limite de contas, documento inválido e sessão sem permissão são diferenciados de indisponibilidade de rede. A conexão restabelecida tenta retomar a sincronização respeitando a revisão.

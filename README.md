@@ -30,6 +30,12 @@ Os dados e alterações pendentes ficam em uma chave por usuário. Escritas usam
 
 As migrações de limites e billing de 13/10/2026 foram aplicadas ao projeto existente após testes com ROLLBACK. O trigger impõe o limite de contas e gera revisões no servidor sem remover contas existentes. Não reaplique essas migrações nem execute migrações antigas sem comparar o histórico do banco.
 
+## Instalação em celulares e computadores
+
+Android usa APK ou PWA. iPhone/iPad usa a instalação pelo Safari; Windows, Linux e macOS usam a PWA em navegador compatível. O botão “Instalar no celular ou computador” aparece antes do login e nas configurações. Mesma conta e sincronização nos dispositivos.
+
+A base nativa iOS compila no Xcode 26.3 para simulador; distribuição em aparelhos exige assinatura Apple. Build e 37 testes foram aprovados em Windows, Linux e macOS. Não há executáveis de desktop nesta entrega. Instruções e limites em [docs/PLATFORMS.md](docs/PLATFORMS.md).
+
 ## Android
 
 ```sh
